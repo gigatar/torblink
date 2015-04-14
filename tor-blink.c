@@ -9,6 +9,7 @@ unsigned long packet_count = 0;     /* Total number of packets */
 float byte_count = 0;               /* Total Byte Count */
 time_t last_log;                    /* Time since last log */
 int running = 1;                    /* For signal catch */
+static char const *iface = "wlan0"; /* Capture interface */
 
 /* flash the led */
 void got_packet(u_char *args, const struct pcap_pkthdr *header,
@@ -87,7 +88,6 @@ int main(int argc, char *argv[]){
     signal(SIGTERM, sig_handler);
     signal(SIGUSR1, sig_handler);
 
-    char *dev = "wlan0";                            /* device to sniff on*/
     char errbuf[PCAP_ERRBUF_SIZE];                  /* create our pcap error buffer */
     pcap_t *handle;                                 /* pcap handler */
     struct bpf_program fp;                          /* The compiled filter */
@@ -97,25 +97,25 @@ int main(int argc, char *argv[]){
 
 
     /* Ensure that we can get our IP and Netmask */
-    if (pcap_lookupnet(dev, &net, &mask, errbuf) == -1)
+    if (pcap_lookupnet(iface, &net, &mask, errbuf) == -1)
     {
-        fprintf(stderr, "Can't get netmask for device %s\n", dev);
+        fprintf(stderr, "Can't get netmask for ifaceice %s\n", iface);
         net = 0;
         mask = 0;
     }
 
     /* Create the handler to the capture */
-    handle = pcap_open_live(dev, BUFSIZ, 0, 20, errbuf);
+    handle = pcap_open_live(iface, BUFSIZ, 0, 20, errbuf);
 
     /* Check if handler creation was successful */
     if(handle == NULL) {
-        fprintf(stderr, "couldn't open device %s: %s", dev, errbuf);
+        fprintf(stderr, "couldn't open ifaceice %s: %s", iface, errbuf);
         return 2;
     }
 
     /* Ensure we're using Ethernet headers */
     if (pcap_datalink(handle) != DLT_EN10MB) { 
-        fprintf(stderr, "Device %s doesn't provide Ethernet headers - not supported\n", dev);
+        fprintf(stderr, "Device %s doesn't provide Ethernet headers - not supported\n", iface);
         return 3;
     }
 
