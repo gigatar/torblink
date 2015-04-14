@@ -4,11 +4,11 @@
 #include <time.h>
 #include <signal.h>
 
-/* Nasty Global VARs */
-unsigned long packet_count = 0; //Total number of packets
-float byte_count = 0; //Total Byte Count
-time_t last_log; //Time since last log
-int running = 1;
+/* Global VARs because I'm lazy */
+unsigned long packet_count = 0;     /* Total number of packets */
+float byte_count = 0;               /* Total Byte Count */
+time_t last_log;                    /* Time since last log */
+int running = 1;                    /* For signal catch */
 
 /* flash the led */
 void got_packet(u_char *args, const struct pcap_pkthdr *header,
@@ -56,7 +56,7 @@ void log_progress(int startup){
     {
         fprintf(f,"\n\n\n**************************************\n* Started capture at %s *\n**************************************\n", tstamp);
     }
-    else if (startup ==2){ /* Log Shutdown */
+    else if (startup == 2){ /* Log Shutdown */
         fprintf(f,"[%s]: %lu pkts / %.2f %s\n", tstamp, packet_count, converted_bytes, size_type);
         fprintf(f,"\n***************************************\n* Stopping capture at %s *\n***************************************\n", tstamp);
     }
@@ -67,16 +67,25 @@ void log_progress(int startup){
     fclose(f);
 }
 
-void sig_handler(int signo){
-    if(signo == SIGTERM){
+/* signal Handler */
+void sig_handler(int signum){
+    /* Flush log and exit on SIGTERM */
+    if(signum == SIGTERM){
         log_progress(2);
         running = 0;
+    }
+
+    // Flush log on USR1
+    if(signum == SIGUSR1)
+    {
+        log_progress(0);       
     }
 }
 
 int main(int argc, char *argv[]){
     /* Setup Signal Handler */
     signal(SIGTERM, sig_handler);
+    signal(SIGUSR1, sig_handler);
 
     char *dev = "wlan0";                            /* device to sniff on*/
     char errbuf[PCAP_ERRBUF_SIZE];                  /* create our pcap error buffer */
