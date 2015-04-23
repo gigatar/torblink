@@ -1,4 +1,5 @@
 #include <stdio.h>
+#include <string.h>
 #include <pcap.h>
 #include <wiringPi.h>
 #include <time.h>
