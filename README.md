@@ -1,5 +1,5 @@
 # torblink
-RaspberryPi application to listen for tor traffic and blink an LED on 
+RaspberryPi application to listen for tor traffic and blink an LED when traffic is seen
 
 This program has two required libraries:
   1. wiringPi: http://wiringpi.com/
