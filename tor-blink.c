@@ -4,6 +4,7 @@
 #include <wiringPi.h>
 #include <time.h>
 #include <signal.h>
+#include <locale.h>
 
 /* Global VARs because I'm lazy */
 unsigned long long packet_count = 0;    /* Total number of packets */
@@ -54,16 +55,17 @@ void log_progress(int startup){
     strftime(tstamp, 50, "%b %d %T", p);
 
     /* Log */
+    setlocale(LC_NUMERIC, "");
     if (startup == 1) /* Log Startup */
     {
         fprintf(f,"\n\n\n**************************************\n* Started capture at %s *\n**************************************\n", tstamp);
     }
     else if (startup == 2){ /* Log Shutdown */
-        fprintf(f,"[%s]: %llu pkts / %.2f %s\n", tstamp, packet_count, converted_bytes, size_type);
+        fprintf(f,"[%s]: %'llu pkts / %.2f %s\n", tstamp, packet_count, converted_bytes, size_type);
         fprintf(f,"\n***************************************\n* Stopping capture at %s *\n***************************************\n", tstamp);
     }
     else { /* Standard Logging */
-        fprintf(f,"[%s]: %llu pkts / %.2f %s\n", tstamp, packet_count, converted_bytes, size_type);
+        fprintf(f,"[%s]: %'llu pkts / %.2f %s\n", tstamp, packet_count, converted_bytes, size_type);
         time(&last_log);
     }
     fclose(f);
