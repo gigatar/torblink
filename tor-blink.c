@@ -6,17 +6,17 @@
 #include <signal.h>
 
 /* Global VARs because I'm lazy */
-unsigned long packet_count = 0;     /* Total number of packets */
-float byte_count = 0;               /* Total Byte Count */
-time_t last_log;                    /* Time since last log */
-int running = 1;                    /* For signal catch */
-static char const *iface = "wlan0"; /* Capture interface */
+unsigned long long packet_count = 0;    /* Total number of packets */
+long double byte_count = 0;             /* Total Byte Count */
+time_t last_log;                        /* Time since last log */
+int running = 1;                        /* For signal catch */
+static char const *iface = "wlan0";     /* Capture interface */
 
 /* flash the led */
 void got_packet(u_char *args, const struct pcap_pkthdr *header,
         const u_char *packet){
     digitalWrite(0, HIGH);
-    delay(2);
+    delay(1.5);
     digitalWrite(0, LOW);
     packet_count++;
     byte_count += header->len;
@@ -25,7 +25,7 @@ void got_packet(u_char *args, const struct pcap_pkthdr *header,
 
 /* Log progress */
 void log_progress(int startup){
-    float converted_bytes;
+    long double converted_bytes;
     char size_type[3];
     FILE *f = fopen("/var/log/torblink.log","a");
 
@@ -59,11 +59,11 @@ void log_progress(int startup){
         fprintf(f,"\n\n\n**************************************\n* Started capture at %s *\n**************************************\n", tstamp);
     }
     else if (startup == 2){ /* Log Shutdown */
-        fprintf(f,"[%s]: %lu pkts / %.2f %s\n", tstamp, packet_count, converted_bytes, size_type);
+        fprintf(f,"[%s]: %llu pkts / %.2f %s\n", tstamp, packet_count, converted_bytes, size_type);
         fprintf(f,"\n***************************************\n* Stopping capture at %s *\n***************************************\n", tstamp);
     }
     else { /* Standard Logging */
-        fprintf(f,"[%s]: %lu pkts / %.2f %s\n", tstamp, packet_count, converted_bytes, size_type);
+        fprintf(f,"[%s]: %llu pkts / %.2f %s\n", tstamp, packet_count, converted_bytes, size_type);
         time(&last_log);
     }
     fclose(f);
